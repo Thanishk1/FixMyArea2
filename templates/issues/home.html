@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - FixMyArea{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="bi bi-list-ul"></i> Civic Issues</h1>
+        <p class="text-muted">Track and report civic issues in your area</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'issues:report' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Report Issue
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
+                            {{ cat.icon }} {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="resolved" {% if status_filter == 'resolved' %}selected{% endif %}>Resolved</option>
+                    <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" class="form-control" placeholder="Search issues..." value="{{ search_query }}">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'issues:home' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Issues Grid -->
+{% if issues %}
+    <div class="row">
+        {% for issue in issues %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card issue-card h-100">
+                <img src="{{ issue.image.url }}" class="card-img-top" alt="{{ issue.title }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">{{ issue.category.icon }} {{ issue.category.name }}</span>
+                    <h5 class="card-title">{{ issue.title }}</h5>
+                    <p class="card-text text-muted small">{{ issue.description|truncatewords:20 }}</p>
+                    {% if issue.location_text %}
+                        <p class="card-text small"><i class="bi bi-geo-alt"></i> {{ issue.location_text|truncatewords:5 }}</p>
+                    {% endif %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge status-badge 
+                            {% if issue.status == 'open' %}bg-danger
+                            {% elif issue.status == 'in_progress' %}bg-warning
+                            {% elif issue.status == 'resolved' %}bg-success
+                            {% else %}bg-secondary{% endif %}">
+                            {{ issue.get_status_display }}
+                        </span>
+                        <a href="{% url 'issues:detail' issue.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted small">
+                    <i class="bi bi-person"></i> {{ issue.reporter.email }} • 
+                    <i class="bi bi-clock"></i> {{ issue.created_at|timesince }} ago
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No issues found. Be the first to <a href="{% url 'issues:report' %}">report an issue</a>!
+    </div>
+{% endif %}
+{% endblock %}

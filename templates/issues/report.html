@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Report Issue - FixMyArea{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2><i class="bi bi-plus-circle"></i> Report a Civic Issue</h2>
+        <p class="text-muted">Upload a photo of the issue. We'll extract location from the image if available.</p>
+
+        <form method="post" enctype="multipart/form-data" id="reportForm">
+            {% csrf_token %}
+            
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Issue Details</h5>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category *</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">Select a category</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Photo</h5>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Upload Image *</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                        <small class="form-text text-muted">We'll try to extract location from the image's GPS data.</small>
+                    </div>
+                    <div id="imagePreview" class="mt-3" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 300px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Location</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Location will be extracted from image if GPS data is available. 
+                        Otherwise, you can manually set it below.
+                    </div>
+                    <div class="mb-3">
+                        <label for="latitude" class="form-label">Latitude</label>
+                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" placeholder="e.g., 12.9716">
+                    </div>
+                    <div class="mb-3">
+                        <label for="longitude" class="form-label">Longitude</label>
+                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" placeholder="e.g., 77.5946">
+                    </div>
+                    <div class="mb-3">
+                        <label for="location_text" class="form-label">Location Description</label>
+                        <input type="text" class="form-control" id="location_text" name="location_text" placeholder="e.g., Main Street, Downtown">
+                    </div>
+                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation()">
+                        <i class="bi bi-geo-alt"></i> Use My Current Location
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle"></i> Submit Issue
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Image preview
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Get current location
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+            }, function(error) {
+                alert('Unable to get your location. Please enter coordinates manually.');
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ issue.title }} - FixMyArea{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <img src="{{ issue.image.url }}" class="card-img-top" alt="{{ issue.title }}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge bg-secondary mb-2">{{ issue.category.icon }} {{ issue.category.name }}</span>
+                        <h2>{{ issue.title }}</h2>
+                    </div>
+                    <span class="badge status-badge 
+                        {% if issue.status == 'open' %}bg-danger
+                        {% elif issue.status == 'in_progress' %}bg-warning
+                        {% elif issue.status == 'resolved' %}bg-success
+                        {% else %}bg-secondary{% endif %} fs-6">
+                        {{ issue.get_status_display }}
+                    </span>
+                </div>
+                
+                <p class="text-muted">{{ issue.description }}</p>
+                
+                {% if issue.location_text %}
+                    <p><i class="bi bi-geo-alt"></i> <strong>Location:</strong> {{ issue.location_text }}</p>
+                {% endif %}
+                
+                {% if issue.latitude and issue.longitude %}
+                    <div id="map" class="map-container mb-3"></div>
+                {% endif %}
+                
+                {% if issue.assigned_authority %}
+                    <p><i class="bi bi-building"></i> <strong>Assigned to:</strong> {{ issue.assigned_authority.name }}</p>
+                {% else %}
+                    <p class="text-muted"><i class="bi bi-exclamation-triangle"></i> Not yet assigned to an authority</p>
+                {% endif %}
+                
+                <hr>
+                <p class="text-muted small">
+                    <i class="bi bi-person"></i> Reported by {{ issue.reporter.email }} • 
+                    <i class="bi bi-clock"></i> {{ issue.created_at|date:"F d, Y" }} at {{ issue.created_at|time:"g:i A" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Status Updates -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Status Updates</h5>
+            </div>
+            <div class="card-body">
+                {% if updates %}
+                    <div class="timeline">
+                        {% for update in updates %}
+                            <div class="mb-4 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="badge 
+                                            {% if update.status == 'open' %}bg-danger
+                                            {% elif update.status == 'in_progress' %}bg-warning
+                                            {% elif update.status == 'resolved' %}bg-success
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ update.get_status_display }}
+                                        </span>
+                                        <p class="mt-2 mb-1">{{ update.notes }}</p>
+                                        <small class="text-muted">
+                                            <i class="bi bi-person"></i> {{ update.author.email }} • 
+                                            <i class="bi bi-clock"></i> {{ update.created_at|date:"M d, Y g:i A" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No updates yet. Check back later for status updates from the authority.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Issue Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Status:</strong><br>
+                    <span class="badge 
+                        {% if issue.status == 'open' %}bg-danger
+                        {% elif issue.status == 'in_progress' %}bg-warning
+                        {% elif issue.status == 'resolved' %}bg-success
+                        {% else %}bg-secondary{% endif %}">
+                        {{ issue.get_status_display }}
+                    </span>
+                </p>
+                <p><strong>Category:</strong><br>{{ issue.category.icon }} {{ issue.category.name }}</p>
+                <p><strong>Reported:</strong><br>{{ issue.created_at|date:"F d, Y" }}</p>
+                {% if issue.assigned_authority %}
+                    <p><strong>Authority:</strong><br>{{ issue.assigned_authority.name }}</p>
+                    {% if issue.assigned_authority.contact_email %}
+                        <p><strong>Contact:</strong><br>{{ issue.assigned_authority.contact_email }}</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if issue.latitude and issue.longitude %}
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script>
+    // Initialize map
+    const map = L.map('map').setView([{{ issue.latitude }}, {{ issue.longitude }}], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add marker
+    L.marker([{{ issue.latitude }}, {{ issue.longitude }}])
+        .addTo(map)
+        .bindPopup('{{ issue.title }}')
+        .openPopup();
+</script>
+{% endblock %}
+{% endif %}
+{% endblock %}
