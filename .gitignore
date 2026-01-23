@@ -49,3 +49,5 @@ Thumbs.db
 # Debug files
 debug_*.html
 selenium_*.html
+# Project data
+data/
