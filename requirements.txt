@@ -2,6 +2,10 @@ Django==4.2.7
 gunicorn==24.0.0
 whitenoise==6.11.0
 
+django-allauth==0.57.0
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
 python-decouple==3.8
 requests==2.31.0
 ExifRead==3.0.0
