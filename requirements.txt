@@ -1,12 +1,42 @@
 Django==4.2.7
-gunicorn==24.0.0
-whitenoise==6.11.0
 
+# Authentication
 django-allauth==0.57.0
+
+# UI / Forms
 django-crispy-forms==2.1
 crispy-bootstrap5==0.7
 
+# Static & media handling
+whitenoise==6.11.0
+django-storages==1.14.2
+
+# Server
+gunicorn==24.0.0
+
+# Environment variables
 python-decouple==3.8
+
+# Database
+psycopg2-binary==2.9.9
+
+# Geo & location
+geopy==2.4.1
+shapely==2.0.2
+numpy<2.0.0
+
+# Image & EXIF
+Pillow==10.1.0
+exifread==3.0.0
+
+# Networking / scraping (used by your code)
 requests==2.31.0
-ExifRead==3.0.0
-Shapely==2.0.2
+beautifulsoup4==4.12.3
+lxml==5.1.0
+
+# Selenium (keep ONLY if you really use it)
+selenium==4.15.2
+webdriver-manager==4.0.1
+
+# AWS (only required if using S3)
+boto3==1.34.0
